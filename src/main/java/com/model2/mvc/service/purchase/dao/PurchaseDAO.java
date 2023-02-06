@@ -90,33 +90,38 @@ public class PurchaseDAO {
 
 		Connection con = DBUtil.getConnection();
 
-		String sql = "select * from TRANSACTION where BUYER_ID = ? order by TRAN_NO";
+		String sql = "select count(tran_no) total from TRANSACTION where BUYER_ID = ? ";
 
-		PreparedStatement stmt = con.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE,
-				ResultSet.CONCUR_UPDATABLE); //
-
+		PreparedStatement stmt = con.prepareStatement(sql);
+		
 		stmt.setString(1, userId);
 
 		ResultSet rs = stmt.executeQuery();
-
-		rs.last();
-		int total = rs.getRow();
+		
+		rs.next();
+		int total = rs.getInt("total");
+		
 		System.out.println("구매목록검색 로우의 수:" + total);
 
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("count", new Integer(total)); // 맵 키 count에 총 검색 결과 수 할당.
-
-		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1);
-		// 보여줄 page번호(ex. 2) page당 보여줄 결과 수(ex.3) - page당 보여줄 결과 수+1(ex.4) =2)
-		// 3*3-3+1 = 7
+		sql = "SELECT iv.num num , t.*\r\n"
+				+ "FROM transaction t, (SELECT ROWNUM as num, vt.tran_no FROM (SELECT tran_no FROM transaction WHERE buyer_id = ? ORDER BY tran_no) vt ) iv \r\n"
+				+ "WHERE t.tran_no = iv.tran_no AND buyer_id = ? AND (num >= ? and num <= ?)"; 
+		stmt = con.prepareStatement(sql);
+		stmt.setString(1, userId);
+		stmt.setString(2, userId);
+		stmt.setInt(3, (searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1));
+		stmt.setInt(4, (searchVO.getPage() * searchVO.getPageUnit()));
 		
+		rs = stmt.executeQuery();
 		System.out.println("searchVO.getPage():" + searchVO.getPage());
 		System.out.println("searchVO.getPageUnit():" + searchVO.getPageUnit());
 
 		ArrayList<PurchaseVO> list = new ArrayList<PurchaseVO>();
 		if (total > 0) { // 검색 결과가 있으면!
 
-			for (int i = 0; i < searchVO.getPageUnit(); i++) {
+			while(rs.next()){
 
 				ProductVO productVO = null;
 				UserVO userVO = null;
@@ -143,8 +148,7 @@ public class PurchaseDAO {
 				purchaseVO.setDivyDate(rs.getString("DLVY_DATE"));
 
 				list.add(purchaseVO);
-				if (!rs.next())
-					break;
+				
 			}
 		}
 		System.out.println("list.size() : " + list.size());

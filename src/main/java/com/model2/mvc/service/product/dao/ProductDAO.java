@@ -65,46 +65,71 @@ public class ProductDAO {
 	public HashMap<String, Object> getProductList(SearchVO searchVO) throws Exception {
 
 		Connection con = DBUtil.getConnection();
-
-		String sql = "	SELECT p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t "
-				+ "		WHERE p.prod_no = t.prod_no(+)";
+		
+		String sql = "SELECT count(prod_no) total FROM product";
 		if (searchVO.getSearchCondition() != null) {
-				
+			
 			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " AND p.PROD_NO='" + searchVO.getSearchKeyword() // searchCon이 0이면 아이디검색
+				sql += " WHERE PROD_NO='" + searchVO.getSearchKeyword() // searchCon이 0이면 아이디검색
 						+ "'";
 			} else if (searchVO.getSearchCondition().equals("1")) {
-				sql += " AND p.PROD_NAME like '%" + searchVO.getSearchKeyword() // serchCon이 1이면 이름 검색
+				sql += " WHERE PROD_NAME like '%" + searchVO.getSearchKeyword() // serchCon이 1이면 이름 검색
 						+ "%'";
 			} else if (searchVO.getSearchCondition().equals("2")) {
-				sql += " AND p.PRICE='" + searchVO.getSearchKeyword() // serchCon이 2이면 가격 검색
+				sql += " WHERE PRICE='" + searchVO.getSearchKeyword() // serchCon이 2이면 가격 검색
 				+ "'";
 			}
 		}
-		sql += " order by p.PROD_NO";
-
-		PreparedStatement stmt = con.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE,
-				ResultSet.CONCUR_UPDATABLE); // ?이부분은 뭐지?
+		
+		PreparedStatement stmt = con.prepareStatement(sql);
+		
 		ResultSet rs = stmt.executeQuery();
-
-		rs.last();
-		int total = rs.getRow();
+		rs.next();
+		int total = rs.getInt("total");
+		
+		sql = "SELECT iv.num, p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t, (SELECT ROWNUM as num, prod_no FROM product ";
+		
+		if (searchVO.getSearchCondition() != null) {
+			
+			if (searchVO.getSearchCondition().equals("0")) {
+				sql += " WHERE PROD_NO='" + searchVO.getSearchKeyword() // searchCon이 0이면 아이디검색
+						+ "'";
+			} else if (searchVO.getSearchCondition().equals("1")) {
+				sql += " WHERE PROD_NAME like '%" + searchVO.getSearchKeyword() // serchCon이 1이면 이름 검색
+						+ "%'";
+			} else if (searchVO.getSearchCondition().equals("2")) {
+				sql += " WHERE PRICE='" + searchVO.getSearchKeyword() // serchCon이 2이면 가격 검색
+				+ "'";
+			}
+		}
+		
+		sql += " ORDER BY prod_no) iv "
+		 		+ " WHERE p.prod_no = t.prod_no(+) "
+		 		+ " AND p.prod_no = iv.prod_no"
+				+ " AND (num >= ? AND num <= ?)";
+		
+		System.out.println(sql);
+		stmt = con.prepareStatement(sql);
+		
+		stmt.setInt(1, (searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1));
+		//1 * 3 - 3 + 1 = 1
+		//2 * 3 - 3 + 1 = 4
+		stmt.setInt(2, (searchVO.getPage() * searchVO.getPageUnit()));
+		
+		rs = stmt.executeQuery();
+		
 		System.out.println("상품검색 로우의 수:" + total);
 
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("count", new Integer(total)); // 맵 키 count에 총 검색 결과 수 할당.
+		map.put("count", new Integer(total)); 
 
-		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1);
-		// 보여줄 page번호(ex. 2) page당 보여줄 결과 수(ex.3) - page당 보여줄 결과 수+1(ex.4) =2)
-		// 3*3-3+1 = 7
-		// 1*3-4 = -1
 		System.out.println("searchVO.getPage():" + searchVO.getPage());
 		System.out.println("searchVO.getPageUnit():" + searchVO.getPageUnit());
 
 		ArrayList<ProductVO> list = new ArrayList<ProductVO>();
 		if (total > 0) { // 검색 결과가 있으면!
 			
-			for (int i = 0; i < searchVO.getPageUnit(); i++) {
+			while(rs.next()) {
 				ProductVO vo = new ProductVO();
 
 				vo.setProdNo(rs.getInt("PROD_NO"));
@@ -117,8 +142,7 @@ public class ProductDAO {
 				vo.setProTranCode(rs.getString("tran_code"));
 				vo.setProTranNo(rs.getInt("tran_no"));
 				list.add(vo);
-				if (!rs.next())
-					break;
+				
 			}
 		}
 		System.out.println("list.size() : " + list.size());

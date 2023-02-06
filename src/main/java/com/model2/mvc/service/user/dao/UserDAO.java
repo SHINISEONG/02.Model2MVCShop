@@ -13,22 +13,21 @@ import com.model2.mvc.common.SearchVO;
 import com.model2.mvc.common.util.DBUtil;
 import com.model2.mvc.service.user.vo.UserVO;
 
-
 public class UserDAO {
-	///field
-	
-	
-	///constructor
-	public UserDAO(){
+	/// field
+	public static HashMap<String, Object> countMaxMap;
+
+	/// constructor
+	public UserDAO() {
 	}
 
-	///method
+	/// method
 	public void insertUser(UserVO userVO) throws Exception {
-		
+
 		Connection con = DBUtil.getConnection();
 
 		String sql = "insert into USERS values (?,?,?,'user',?,?,?,?,sysdate)";
-		
+
 		PreparedStatement stmt = con.prepareStatement(sql);
 		stmt.setString(1, userVO.getUserId());
 		stmt.setString(2, userVO.getUserName());
@@ -38,16 +37,16 @@ public class UserDAO {
 		stmt.setString(6, userVO.getAddr());
 		stmt.setString(7, userVO.getEmail());
 		stmt.executeUpdate();
-		
+
 		con.close();
 	}
 
 	public UserVO findUser(String userId) throws Exception {
-		
+
 		Connection con = DBUtil.getConnection();
 
 		String sql = "select * from USERS where USER_ID=?";
-		
+
 		PreparedStatement stmt = con.prepareStatement(sql);
 		stmt.setString(1, userId);
 
@@ -66,53 +65,61 @@ public class UserDAO {
 			userVO.setEmail(rs.getString("EMAIL"));
 			userVO.setRegDate(rs.getDate("REG_DATE"));
 		}
-		
+
 		con.close();
 
 		return userVO;
 	}
 
-	public HashMap<String,Object> getUserList(SearchVO searchVO) throws Exception {
-		
+	public HashMap<String, Object> getUserList(SearchVO searchVO) throws Exception {
+
 		Connection con = DBUtil.getConnection();
-		
-		String sql = "select * from USERS ";
+
+		String sql = "SELECT COUNT(user_id) total FROM users";
 		if (searchVO.getSearchCondition() != null) {
 			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " where USER_ID like '%" + searchVO.getSearchKeyword()
-						+ "%'";
+				sql += " where USER_ID like '%" + searchVO.getSearchKeyword() + "%'";
 			} else if (searchVO.getSearchCondition().equals("1")) {
-				sql += " where USER_NAME='" + searchVO.getSearchKeyword()
-						+ "'";
+				sql += " where USER_NAME LIKE '%" + searchVO.getSearchKeyword() + "%'";
 			}
 		}
-		sql += " order by USER_ID";
 
-		PreparedStatement stmt = 
-			con.prepareStatement(	sql,
-														ResultSet.TYPE_SCROLL_INSENSITIVE,
-														ResultSet.CONCUR_UPDATABLE);
+		PreparedStatement stmt = con.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery();
-
-		rs.last();
-		int total = rs.getRow();
-		System.out.println("로우의 수:" + total);
-
-		HashMap<String,Object> map = new HashMap<String,Object>();
+		rs.next();
+		int total = rs.getInt("total");
+		System.out.println("total : " + total);
 		
-		if(!(map.containsKey("count"))) {
-			map.put("maxCount", new Integer(total));
-		}
-		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+
 		map.put("count", new Integer(total));
-
-		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit()+1);
-		System.out.println("searchVO.getPage():" + searchVO.getPage());
-		System.out.println("searchVO.getPageUnit():" + searchVO.getPageUnit());
-
+		
+		sql = "SELECT u.*, iv.num num FROM users u, ( SELECT ROWNUM as num , user_id FROM users ";
+		if (searchVO.getSearchCondition() != null) {
+			if (searchVO.getSearchCondition().equals("0")) {
+				sql += " where USER_ID like '%" + searchVO.getSearchKeyword() + "%'";
+			} else if (searchVO.getSearchCondition().equals("1")) {
+				sql += " where USER_NAME LIKE '%" + searchVO.getSearchKeyword() + "%'";
+			}
+		}
+		sql += " ORDER BY user_id) iv "
+		+      " WHERE u.user_id = iv.user_id "
+		+	   " AND (num >= ? and num <= ? ) ";
+		
+		System.out.println(sql);
+		System.out.println((searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1));
+		System.out.println((searchVO.getPage() * searchVO.getPageUnit()));
+		stmt = con.prepareStatement(sql);
+		stmt.setInt(1, (searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1));
+						//1 * 3 - 3 + 1 = 1
+						//2 * 3 - 3 + 1 = 4
+		stmt.setInt(2, (searchVO.getPage() * searchVO.getPageUnit()));
+						//
+		rs = stmt.executeQuery();
+		
 		ArrayList<UserVO> list = new ArrayList<UserVO>();
 		if (total > 0) {
-			for (int i = 0; i < searchVO.getPageUnit(); i++) {
+			while (rs.next()){
 				UserVO vo = new UserVO();
 				vo.setUserId(rs.getString("USER_ID"));
 				vo.setUserName(rs.getString("USER_NAME"));
@@ -123,27 +130,26 @@ public class UserDAO {
 				vo.setAddr(rs.getString("ADDR"));
 				vo.setEmail(rs.getString("EMAIL"));
 				vo.setRegDate(rs.getDate("REG_DATE"));
-
+				System.out.println(vo);
 				list.add(vo);
-				if (!rs.next())
-					break;
+				
 			}
 		}
-		System.out.println("list.size() : "+ list.size());
+		System.out.println("list.size() : " + list.size());
 		map.put("list", list);
-		System.out.println("map().size() : "+ map.size());
+		System.out.println("map().size() : " + map.size());
 
 		con.close();
-			
+
 		return map;
 	}
 
 	public void updateUser(UserVO userVO) throws Exception {
-		
+
 		Connection con = DBUtil.getConnection();
 
 		String sql = "update USERS set USER_NAME=?,CELL_PHONE=?,ADDR=?,EMAIL=? where USER_ID=?";
-		
+
 		PreparedStatement stmt = con.prepareStatement(sql);
 		stmt.setString(1, userVO.getUserName());
 		stmt.setString(2, userVO.getPhone());
@@ -151,7 +157,7 @@ public class UserDAO {
 		stmt.setString(4, userVO.getEmail());
 		stmt.setString(5, userVO.getUserId());
 		stmt.executeUpdate();
-		
+
 		con.close();
 	}
 }

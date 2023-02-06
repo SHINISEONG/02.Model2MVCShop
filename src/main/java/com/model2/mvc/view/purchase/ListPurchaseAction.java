@@ -28,8 +28,24 @@ public class ListPurchaseAction extends Action {
 		searchVO.setSearchCondition(request.getParameter("searchCondition"));
 		searchVO.setSearchKeyword(request.getParameter("searchKeyword"));
 		
-		String pageUnit = getServletContext().getInitParameter("pageSize");
+		String pageUnit=getServletContext().getInitParameter("pageSize");  //servletcontext를 각 액션에 부여한 이유.
+		String pageDiv=getServletContext().getInitParameter("pageDiv");
 		searchVO.setPageUnit(Integer.parseInt(pageUnit));
+		searchVO.setPageDiv(Integer.parseInt(pageDiv));
+		
+		int pageDivCnt = 1; 
+		if (request.getParameter("pageDivCnt")!=null) {
+			pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
+		}
+		String pageDivCondition = request.getParameter("pageDivCondition");
+		
+		if(pageDivCondition != null) {
+			if(pageDivCondition.equals("previous")) {
+				pageDivCnt--;
+			} else if(pageDivCondition.equals("next")) {
+				pageDivCnt++;
+			}
+		}
 		
 		PurchaseService service = new PurchaseServiceImpl();
 		HttpSession session = request.getSession(); 
@@ -39,7 +55,7 @@ public class ListPurchaseAction extends Action {
 		request.setAttribute("map", map);
 		request.setAttribute("searchVO", searchVO);
 		
-		return "forward:/purchase/listPurchase.jsp";
+		return "forward:/purchase/listPurchase.jsp?&pageDivCnt="+pageDivCnt;
 	}//end of execute()
 
 }

@@ -3,10 +3,54 @@ Model2SHOP QUERY
 ----01. User-------------------------------------------------------------------------------------------
 
 
+SELECT COUNT(user_id) total FROM users;
+
+SELECT u.*, iv.num "num" FROM users u, ( SELECT ROWNUM as num , user_id FROM users ORDER BY user_id) iv
+WHERE u.user_id = iv.user_id
+AND num BETWEEN 2 and 5;
+
+SELECT u.*, iv.num num FROM users u, ( SELECT ROWNUM as num , user_id FROM users  ORDER BY user_id) iv  WHERE u.user_id = iv.user_id  AND (num >= 1 and num <= 3 ) ;
+
+
+SELECT iv.*, total.total FROM
+		(
+		 SELECT * FROM users
+		 ORDER BY user_id
+		) iv,
+		(SELECT count(user_id) total FROM users
+		) total
+WHERE ROWNUM <=4;
+
+		
+SELECT iv.*, total.total FROM
+		(
+		 SELECT * FROM users ORDER BY user_id 
+		 
+		 WHERE user_id = ?
+		
+		) iv,
+		(
+		 SELECT count(user_id) total FROM users
+		 WHERE user_id = ?
+		) total
+WHERE ROWNUM >=? AND ROWNUM<=?
 
 
 
 
+SELECT
+	e.부서명, e.직원명, e.급여, e.커미션
+	FROM
+	(
+		SELECT
+		d.department_name 부서명, e.first_name 직원명, e.salary 급여, NVL(e.commission_pct,0) 커미션
+		FROM
+		employees e , departments d
+		WHERE
+		e.department_id = d.department_id
+		ORDER BY 커미션 DESC, e.salary DESC
+	)e
+	WHERE ROWNUM <= 4;
 
 
 
@@ -45,9 +89,26 @@ Model2SHOP QUERY
 	FROM product p, ( SELECT NVL(t.tran_status_code,0) "TRAN_STATUS_CODE"
 			  FROM product p, transaction t
 			  WHERE p.prod_no = t.prod_no ) iv;
+
+SELECT count(prod_no) FROM product where ;
 	
-	
+SELECT p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t, (
+
+
+SELECT iv.num, p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t, (SELECT ROWNUM as num, prod_no FROM product ORDER BY prod_no) iv
+WHERE p.prod_no = t.prod_no(+)
+AND p.prod_no = iv.prod_no;
+
 ----03. Purchase ------------------------------------------------------------------------------------
+
+
+
+SELECT count(tran_no) total from transaction;
+
+SELECT iv.num num , t.*
+FROM transaction t, (SELECT ROWNUM as num, vt.tran_no FROM (SELECT tran_no FROM transaction WHERE buyer_id = 'user17' ORDER BY tran_no) vt ) iv 
+WHERE t.tran_no = iv.tran_no AND buyer_id = 'user17' and (num >= 2 and num <= 4);
+
 
 01. insertPurchase()
 	

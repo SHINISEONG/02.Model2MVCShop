@@ -23,16 +23,46 @@
 	
 	int currentPage=searchVO.getPage();
 	
+	int pageDiv=searchVO.getPageDiv();
+	int pageDivCnt = 1; 
+	
+	if(request.getParameter("pageDivCnt")!=null){
+		pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
+	}	
+	
+	int pageDivStart = pageDivCnt*pageDiv - pageDiv + 1;
+	int pageDivEnd = pageDivStart+pageDiv-1;
+	
+	int pageDivMax = 0;
+	
 	int totalPage=0;
+	
 	if(total > 0) {
+		
 		totalPage= total / searchVO.getPageUnit() ;
-		if(total%searchVO.getPageUnit() >0)
+		if(total%searchVO.getPageUnit() >0) {
 			totalPage += 1;
+		}
+		
+		pageDivMax = total / (pageDiv*searchVO.getPageUnit());
+		if(total%(pageDiv*searchVO.getPageUnit()) > 0){
+			pageDivMax +=1;
+		}
+		
+	}
+	
+	if (pageDivEnd>totalPage){
+		pageDivEnd = totalPage;
 	}
 	
 	if(searchVO.getSearchCondition()==null){
 		searchVO.setSearchCondition("");
 	}
+	
+	if(searchVO.getSearchKeyword() == null){
+		searchVO.setSearchKeyword("");
+	}
+	
 	String menu="";
 	menu = request.getParameter("menu");
 	
@@ -219,11 +249,19 @@ function fncGetProductList(){
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
 	<tr>
 		<td align="center">
-		<%
-	  		for(int i=1;i<=totalPage;i++){
-		%>
-			<a href="/listProduct.do?page=<%=i%>&menu=<%=menu%>&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>"><%=i%></a>
-		<% } %>
+		
+		
+		<%if(pageDivCnt > 1)  {%>
+				<a href="/listProduct.do?page=<%=pageDivStart-1%>&menu=<%=menu%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=previous&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&lt;&lt;&nbsp;</a>
+		<%} %>
+		
+		<% for(int i=pageDivStart;i<=pageDivEnd;i++){ %>
+			<a href="/listProduct.do?page=<%=i%>&menu=<%=menu%>&pageDivCnt=<%=pageDivCnt %>&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>"><%=i %></a>
+		<%}	%>
+		
+		<%if(pageDivCnt<pageDivMax) {%>
+			<a href="/listProduct.do?page=<%=pageDivEnd+1%>&menu=<%=menu%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=next&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&gt;&gt;&nbsp;</a>		
+		<%} %>
 		
     	</td>
 	</tr>

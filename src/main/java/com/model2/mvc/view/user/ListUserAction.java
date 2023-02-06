@@ -49,7 +49,9 @@ public class ListUserAction extends Action {
 		System.out.println("pageDiv : " + pageDiv);
 		UserService service=new UserServiceImpl();
 		HashMap<String,Object> map=service.getUserList(searchVO);
-
+		
+		
+		
 		request.setAttribute("map", map);
 		request.setAttribute("searchVO", searchVO);
 		

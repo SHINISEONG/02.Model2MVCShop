@@ -23,12 +23,27 @@ public class ListProductAction extends Action {
 		searchVO.setPage(page);
 		searchVO.setSearchCondition(request.getParameter("searchCondition"));
 		searchVO.setSearchKeyword(request.getParameter("searchKeyword"));
-		System.out.println("검색어 리스트 프로덕트 액션으로 잘 넘어와?"+searchVO.getSearchKeyword());
-		System.out.println("검색어 리스트 프로덕트 액션으로 잘 넘어와? 바로파람"+request.getParameter("searchKeyword"));
-
-		String pageUnit = getServletContext().getInitParameter("pageSize");
+		
+		String pageUnit=getServletContext().getInitParameter("pageSize");  //servletcontext를 각 액션에 부여한 이유.
+		String pageDiv=getServletContext().getInitParameter("pageDiv");
 		searchVO.setPageUnit(Integer.parseInt(pageUnit));
-		System.out.println(searchVO);
+		searchVO.setPageDiv(Integer.parseInt(pageDiv));		
+		
+		
+		int pageDivCnt = 1; 
+		if (request.getParameter("pageDivCnt")!=null) {
+			pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
+		}
+		String pageDivCondition = request.getParameter("pageDivCondition");
+		
+		if(pageDivCondition != null) {
+			if(pageDivCondition.equals("previous")) {
+				pageDivCnt--;
+			} else if(pageDivCondition.equals("next")) {
+				pageDivCnt++;
+			}
+		}
+		
 		ProductService service = new ProductServiceImpl();
 		HashMap<String, Object> map = service.getProductList(searchVO);
 
@@ -37,7 +52,7 @@ public class ListProductAction extends Action {
 		
 
 		// TODO navigating 방식 및 URI 확인
-		return "forward:/product/listProduct.jsp";
+		return "forward:/product/listProduct.jsp?&pageDivCnt="+pageDivCnt;
 	}
 
 }

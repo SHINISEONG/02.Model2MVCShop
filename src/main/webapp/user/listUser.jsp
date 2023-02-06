@@ -210,7 +210,8 @@ function fncGetUserList(){
 		<%}	%>
 		
 		<%if(pageDivCnt<pageDivMax) {%>
-			<a href="/listUser.do?page=<%=pageDivEnd+1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=next&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&gt;&gt;&nbsp;</a>		<%} %>
+			<a href="/listUser.do?page=<%=pageDivEnd+1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=next&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&gt;&gt;&nbsp;</a>		
+		<%} %>
 		
     	</td>
 	</tr>
