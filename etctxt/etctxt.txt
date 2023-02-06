@@ -1,0 +1,12 @@
+상품등록
+enctype="multipart/form-data <- ctrl f 후삭제
+
+140번 라인	type="text" 수정
+
+상품정보 수정
+enctype="multipart/form-data  삭제
+
+
+142번 라인 type text로 수정
+
+user 17 / 1717사용

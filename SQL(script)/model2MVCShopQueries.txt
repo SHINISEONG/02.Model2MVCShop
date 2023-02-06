@@ -1,0 +1,104 @@
+Model2SHOP QUERY
+
+----01. User-------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+----02. Product------------------------------------------------------------------------------------------
+
+01. insertProduct()
+	
+	INSERT INTO product VALUES(seq_product_prod_no.NEXTVAL, '놑투북', '노트북이에용',
+				'20220801', '1000000', 'image.jpg', sysdate);
+
+	INSERT INTO product VALUES(seq_product_prod_no.NEXTVAL, ?, ?,
+				?, ?, ?, sysdate)
+
+02. findProduct()
+	
+	SELECT * FROM product WHERE prod_name = '보르도'  ;
+	SELECT * FROM product WHERE prod_name = ?
+
+	SELECT p.*, t.tran_status_code tranNo FROM product p, transaction t WHERE p.prod_no = t.prod_no AND prod_name='보르도';
+
+	SELECT p.*, t.tran_status_code tranNo FROM product p, transaction t WHERE p.prod_no = t.prod_no AND p.prod_no = 10001;
+	SELECT p.*, t.tran_status_code tranNo FROM product p, transaction t WHERE p.prod_no = t.prod_no AND p.prod_no = ?
+
+03. updateProduct()
+
+	UPDATE product SET prod_name='후히히', prod_detail='디테이루', manufacture_day='20230101', price=100, image_file='img.jpg' WHERE prod_no=10002;
+	UPDATE product SET prod_name=?, prod_detail=?, manufacture_day=?, price=?, image_file=? WHERE prod_no=?
+
+04. getProductList()
+
+	select p.*, NVL(t.tran_status_code,0) tranCode from PRODUCT p, transaction t
+	WHERE p.prod_no = t.prod_no(+);
+
+	SELECT p.*, iv.TRAN_STATUS_CODE
+	FROM product p, ( SELECT NVL(t.tran_status_code,0) "TRAN_STATUS_CODE"
+			  FROM product p, transaction t
+			  WHERE p.prod_no = t.prod_no ) iv;
+	
+	
+----03. Purchase ------------------------------------------------------------------------------------
+
+01. insertPurchase()
+	
+	INSERT INTO transaction VALUES(seq_transaction_tran_no.NEXTVAL, 10001, 'user01', '1', 
+	'신희성', '01012341234', '갱기도', '조심히오세요', 
+	'cod', sysdate,'2012/12/12');
+
+	INSERT INTO transaction VALUES(seq_transaction_tran_no.NEXTVAL,
+					?, ?, ?, ?, ?, ?, ?, ? , sysdate,?)
+
+02. findPurchase()
+
+	SELECT * FROM transaction WHERE TRAN_NO = ?
+
+03. getPurchaseList()
+	
+	SELECT * FROM transaction WHERE BUYER_ID = ?
+
+04. updatePurchase()
+
+	UPDATE transaction SET payment_option=?, receiver_name=?, receiver_phone=?, dlvy_addr=?, dlvy_request=?, dlvy_date=? WHERE tran_no=?
+
+05. getSaleList()
+
+	SELECT p.prod_no
+	FROM product p, transaction t
+	WHERE p.prod_no = t.prod_no
+
+	SELECT p.prod_no prodNo FROM product p, transaction t WHERE p.prod_no = t.prod_no
+	
+	SELECT prod_no prodNo, tran_no tranNo FROM transaction;
+	SELECT prod_no prodNo, tran_no tranNo FROM transaction
+
+	SELECT t.prod_no prodNo, t.tran_no tranNo, u.user_id FROM users u, transaction t 
+	WHERE u.user_id = t.buyer_id
+	AND u.user_id = 'user17';
+	
+	SELECT prod_no prodNo, tran_no tranNo FROM transaction WHERE prod_no = 10001;
+	SELECT prod_no prodNo, tran_no tranNo FROM transaction WHERE prod_no = ?
+	
+	---user---
+
+	SELECT t.prod_no prodNo, t.tran_no tranNo, u.user_id FROM users u, transaction t 
+	WHERE u.user_id = t.buyer_id
+	AND u.user_id = ?
+
+	---admin---
+
+	SELECT t.prod_no prodNo, t.tran_no tranNo, u.user_id FROM users u, transaction t 
+	WHERE u.user_id = t.buyer_id
+
+06. updateTranCode()
+
+	UPDATE transaction SET tran_status_code=? WHERE tran_no=?
