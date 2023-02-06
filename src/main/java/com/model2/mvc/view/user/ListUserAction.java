@@ -27,14 +27,34 @@ public class ListUserAction extends Action {
 		searchVO.setSearchKeyword(request.getParameter("searchKeyword"));
 		
 		String pageUnit=getServletContext().getInitParameter("pageSize");  //servletcontext를 각 액션에 부여한 이유.
+		String pageDiv=getServletContext().getInitParameter("pageDiv");
 		searchVO.setPageUnit(Integer.parseInt(pageUnit));
+		searchVO.setPageDiv(Integer.parseInt(pageDiv));
 		
+		
+		int pageDivCnt = 1; 
+		if (request.getParameter("pageDivCnt")!=null) {
+			pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
+		}
+		String pageDivCondition = request.getParameter("pageDivCondition");
+		
+		if(pageDivCondition != null) {
+			if(pageDivCondition.equals("previous")) {
+				pageDivCnt--;
+			} else if(pageDivCondition.equals("next")) {
+				pageDivCnt++;
+			}
+		}
+		
+		System.out.println("pageDiv : " + pageDiv);
 		UserService service=new UserServiceImpl();
 		HashMap<String,Object> map=service.getUserList(searchVO);
 
 		request.setAttribute("map", map);
 		request.setAttribute("searchVO", searchVO);
 		
-		return "forward:/user/listUser.jsp";
+		
+		return "forward:/user/listUser.jsp?&pageDivCnt="+pageDivCnt;
+		
 	}
 }

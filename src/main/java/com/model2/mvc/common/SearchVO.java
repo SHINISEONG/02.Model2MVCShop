@@ -7,6 +7,7 @@ public class SearchVO {
 	String searchCondition;
 	String searchKeyword;
 	int pageUnit;
+	int pageDiv;
 	
 	public SearchVO(){
 	}
@@ -18,6 +19,14 @@ public class SearchVO {
 		this.pageUnit = pageUnit;
 	}
 	
+	public int getPageDiv() {
+		return pageDiv;
+	}
+
+	public void setPageDiv(int pageDiv) {
+		this.pageDiv = pageDiv;
+	}
+
 	public int getPage() {
 		return page;
 	}

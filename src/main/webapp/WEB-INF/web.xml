@@ -11,7 +11,12 @@
 		<param-name>pageSize</param-name>
 		<param-value>3</param-value>
 	</context-param>
-
+	
+	<context-param>
+		<param-name>pageDiv</param-name>
+		<param-value>2</param-value>
+	</context-param>
+	
 	<filter>
 		<filter-name>requestFilter</filter-name>
 		<filter-class>com.model2.mvc.filter.RequestFilter</filter-class>

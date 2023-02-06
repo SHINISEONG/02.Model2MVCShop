@@ -6,16 +6,23 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.security.auth.message.callback.PrivateKeyCallback.Request;
+import javax.servlet.RequestDispatcher;
+
 import com.model2.mvc.common.SearchVO;
 import com.model2.mvc.common.util.DBUtil;
 import com.model2.mvc.service.user.vo.UserVO;
 
 
 public class UserDAO {
+	///field
 	
+	
+	///constructor
 	public UserDAO(){
 	}
 
+	///method
 	public void insertUser(UserVO userVO) throws Exception {
 		
 		Connection con = DBUtil.getConnection();
@@ -72,8 +79,8 @@ public class UserDAO {
 		String sql = "select * from USERS ";
 		if (searchVO.getSearchCondition() != null) {
 			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " where USER_ID='" + searchVO.getSearchKeyword()
-						+ "'";
+				sql += " where USER_ID like '%" + searchVO.getSearchKeyword()
+						+ "%'";
 			} else if (searchVO.getSearchCondition().equals("1")) {
 				sql += " where USER_NAME='" + searchVO.getSearchKeyword()
 						+ "'";
@@ -92,6 +99,11 @@ public class UserDAO {
 		System.out.println("로우의 수:" + total);
 
 		HashMap<String,Object> map = new HashMap<String,Object>();
+		
+		if(!(map.containsKey("count"))) {
+			map.put("maxCount", new Integer(total));
+		}
+		
 		map.put("count", new Integer(total));
 
 		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit()+1);
