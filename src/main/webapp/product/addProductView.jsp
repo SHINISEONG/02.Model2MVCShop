@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
-<%@ page import = "com.model2.mvc.service.product.vo.ProductVO" %>
+<%@ page import = "com.model2.mvc.service.domain.Product" %>
 
 <%
-ProductVO productVO = (ProductVO)request.getAttribute("productVO");
+Product productVO = (Product)request.getAttribute("productVO");
 
 System.out.println("다시 확인할때 addPV로 잘 넘어왔니?"+productVO);
-
 %>
 
 <html>

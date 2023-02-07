@@ -1,19 +1,17 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
-<%@ page import = "com.model2.mvc.service.product.vo.*" %>
-<%@ page import = "com.model2.mvc.service.user.vo.*" %>
+<%@ page import = "com.model2.mvc.service.product.domain.*" %>
+<%@ page import = "com.model2.mvc.service.domain.*" %>
 
 <%
+Product productVO=null;
+User userVO=null;
 
-ProductVO productVO=null;
-UserVO userVO=null;
-
-productVO = (ProductVO)request.getAttribute("productVO");
+productVO = (Product)request.getAttribute("productVO");
 System.out.println("req에서 addPurView로 prodVO잘 넘어오니?"+productVO);
 session.setAttribute("productVO", productVO);
 
-userVO = (UserVO)session.getAttribute("user");
+userVO = (User)session.getAttribute("user");
 System.out.println("session에서 addPurView로 userVO잘 넘어오니?"+userVO);
-
 %>
 
 <html>

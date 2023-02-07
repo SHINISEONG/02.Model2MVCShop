@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
-<%@ page import = "com.model2.mvc.service.product.vo.ProductVO" %>
+<%@ page import = "com.model2.mvc.service.domain.Product" %>
 
 <%
-ProductVO productVO = (ProductVO)request.getAttribute("productVO");
+Product productVO = (Product)request.getAttribute("productVO");
 
 String menu = request.getParameter("menu");
 
@@ -13,7 +13,6 @@ if(request.getParameter("updateChecker") != null) {
 }
 
 System.out.println(updateChecker);
-
 %>
 
 <html>

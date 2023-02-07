@@ -5,9 +5,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.model2.mvc.framework.Action;
+import com.model2.mvc.service.domain.Product;
 import com.model2.mvc.service.product.ProductService;
 import com.model2.mvc.service.product.impl.ProductServiceImpl;
-import com.model2.mvc.service.product.vo.ProductVO;
 
 public class UpdateProductAction extends Action {
 
@@ -20,7 +20,7 @@ public class UpdateProductAction extends Action {
 		
 		System.out.println("updateAction내부로 prodNo오니?"+prodNo);
 		
-		ProductVO productVO = new ProductVO();
+		Product productVO = new Product();
 		
 		productVO.setProdNo(prodNo);
 		productVO.setProdName(request.getParameter("prodName"));

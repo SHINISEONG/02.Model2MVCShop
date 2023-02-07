@@ -1,9 +1,9 @@
-package com.model2.mvc.service.product.vo;
+package com.model2.mvc.service.domain;
 
 import java.sql.Date;
 
 
-public class ProductVO {
+public class Product {
 	
 	private String fileName;
 	private String manuDate;
@@ -15,7 +15,7 @@ public class ProductVO {
 	private String proTranCode;
 	private int proTranNo;
 	
-	public ProductVO(){
+	public Product(){
 	}
 	
 	public int getProTranNo() {

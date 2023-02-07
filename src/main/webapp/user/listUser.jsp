@@ -1,80 +1,36 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
 
-<%@ page import="java.util.*"  %>
-<%@ page import="com.model2.mvc.service.user.vo.*" %>
-<%@ page import="com.model2.mvc.common.*" %>
+<%@ page import="java.util.List"  %>
+
+<%@ page import="com.model2.mvc.service.domain.User" %>
+<%@ page import="com.model2.mvc.common.Search" %>
+<%@page import="com.model2.mvc.common.Page"%>
+<%@page import="com.model2.mvc.common.util.CommonUtil"%>
 
 <%
-	HashMap<String,Object> map=(HashMap<String,Object>)request.getAttribute("map");
-	SearchVO searchVO=(SearchVO)request.getAttribute("searchVO");
+	List<User> list= (List<User>)request.getAttribute("list");
+	Page resultPage=(Page)request.getAttribute("resultPage");
 	
-	int total=0;
-	ArrayList<UserVO> list=null;
-	if(map != null){
-		total=((Integer)map.get("count")).intValue();
-		list=(ArrayList<UserVO>)map.get("list");
-	}
-	
-	int currentPage=searchVO.getPage();
-	
-	int pageDiv=searchVO.getPageDiv();
-	int pageDivCnt = 1; 
-	
-	
-	if(request.getParameter("pageDivCnt")!=null){
-		pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
-	}	
-	
-	System.out.println("pageDivCnt : " + pageDivCnt);
-	int pageDivStart = pageDivCnt*pageDiv - pageDiv + 1;
-	int pageDivEnd = pageDivStart+pageDiv-1;
-	
-	int pageDivMax = 0;
-		
-	
-	
-	int totalPage=0;
-	if(total > 0) {
-		
-		totalPage= total / searchVO.getPageUnit() ;
-		if(total%searchVO.getPageUnit() >0) {
-			totalPage += 1;
-		}
-		
-		pageDivMax = total / (pageDiv*searchVO.getPageUnit());
-		if(total%(pageDiv*searchVO.getPageUnit()) > 0){
-			pageDivMax +=1;
-		}
-		
-	}
-	
-	if (pageDivEnd>totalPage){
-		pageDivEnd = totalPage;
-	}
-	
-	if(searchVO.getSearchCondition() == null){
-		searchVO.setSearchCondition("");
-	}
-	
-	if(searchVO.getSearchKeyword() == null){
-		searchVO.setSearchKeyword("");
-	}
-	System.out.println("pageDivMax : " + pageDivMax);
-	System.out.println("pageDivStart : " + pageDivStart);
-	System.out.println("pageDivEnd : " + pageDivEnd);
+	Search search = (Search)request.getAttribute("search");
+	//==> null 을 ""(nullString)으로 변경
+	String searchCondition = CommonUtil.null2str(search.getSearchCondition());
+	String searchKeyword = CommonUtil.null2str(search.getSearchKeyword());
 %>
 
 <html>
 <head>
-<title>회원 목록조회</title>
+<title>회원 목록 조회</title>
 
 <link rel="stylesheet" href="/css/admin.css" type="text/css">
 
 <script type="text/javascript">
-function fncGetUserList(){
-	document.detailForm.submit();
-}
+	// 검색 / page 두가지 경우 모두 Form 전송을 위해 JavaScrpt 이용  
+	function fncGetUserList(currentPage) {
+		document.getElementById("currentPage").value = currentPage;
+		document.detailForm.submit();		
+	}
 </script>
+
 </head>
 
 <body bgcolor="#ffffff" text="#000000">
@@ -86,7 +42,7 @@ function fncGetUserList(){
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
 		<td width="15" height="37">
-			<img src="/images/ct_ttl_img01.gif" width="15" height="37">
+			<img src="/images/ct_ttl_img01.gif" width="15" height="37"/>
 		</td>
 		<td background="/images/ct_ttl_img02.gif" width="100%" style="padding-left:10px;">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -103,52 +59,25 @@ function fncGetUserList(){
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
 	<tr>
-	<%
-		if(searchVO.getSearchCondition() != null) {
-	%>
 		<td align="right">
 			<select name="searchCondition" class="ct_input_g" style="width:80px">
-		<%
-				if(searchVO.getSearchCondition().equals("0")){
-		%>
-				<option value="0" selected>회원ID</option>
-				<option value="1">회원명</option>
-		<%
-				}else {
-		%>
-				<option value="0">회원ID</option>
-				<option value="1" selected>회원명</option>
-		<%
-				}
-		%>
+				<option value="0" <%= (searchCondition.equals("0") ? "selected" : "")%>>회원ID</option>
+				<option value="1" <%= (searchCondition.equals("1") ? "selected" : "")%>>회원명</option>
 			</select>
-			<input 	type="text" name="searchKeyword"  value="<%=searchVO.getSearchKeyword() %>" 
-							class="ct_input_g" style="width:200px; height:19px" >
+			<input 	type="text" name="searchKeyword" value="<%= searchKeyword %>"  class="ct_input_g" 
+							style="width:200px; height:20px" >
 		</td>
-	<%
-		}else{
-	%>
-		<td align="right">
-			<select name="searchCondition" class="ct_input_g" style="width:80px">
-				<option value="0">회원ID</option>
-				<option value="1">회원명</option>
-			</select>
-			<input type="text" name="searchKeyword"  class="ct_input_g" style="width:200px; height:19px" >
-		</td>
-	<%
-		}
-	%>
 		<td align="right" width="70">
 			<table border="0" cellspacing="0" cellpadding="0">
 				<tr>
 					<td width="17" height="23">
-						<img src="/images/ct_btnbg01.gif" width="17" height="23">
+						<img src="/images/ct_btnbg01.gif" width="17" height="23"/>
 					</td>
 					<td background="/images/ct_btnbg02.gif" class="ct_btn01" style="padding-top:3px;">
-						<a href="javascript:fncGetUserList();">검색</a>
+						<a href="javascript:fncGetUserList('1');">검색</a>
 					</td>
 					<td width="14" height="23">
-						<img src="/images/ct_btnbg03.gif" width="14" height="23">
+						<img src="/images/ct_btnbg03.gif" width="14" height="23"/>
 					</td>
 				</tr>
 			</table>
@@ -158,7 +87,9 @@ function fncGetUserList(){
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
 	<tr>
-		<td colspan="11" >전체  <%= total%> 건수, 현재 <%=currentPage %> 페이지</td>
+		<td colspan="11" >
+			전체  <%= resultPage.getTotalCount() %> 건수,	현재 <%= resultPage.getCurrentPage() %> 페이지
+		</td>
 	</tr>
 	<tr>
 		<td class="ct_list_b" width="100">No</td>
@@ -169,18 +100,15 @@ function fncGetUserList(){
 		<td class="ct_line02"></td>
 		<td class="ct_list_b">이메일</td>		
 	</tr>
-	
 	<tr>
 		<td colspan="11" bgcolor="808285" height="1"></td>
 	</tr>
-	
-	<% 	
-		int no=list.size();
+	<%
 		for(int i=0; i<list.size(); i++) {
-			UserVO vo = (UserVO)list.get(i);
+			User vo = list.get(i);
 	%>
 	<tr class="ct_list_pop">
-		<td align="center"><%=no--%></td>
+		<td align="center"><%= i + 1 %></td>
 		<td></td>
 		<td align="left">
 			<a href="/getUser.do?userId=<%=vo.getUserId() %>"><%= vo.getUserId() %></a>
@@ -188,8 +116,7 @@ function fncGetUserList(){
 		<td></td>
 		<td align="left"><%= vo.getUserName() %></td>
 		<td></td>
-		<td align="left"><%= vo.getEmail() %>
-		</td>		
+		<td align="left"><%= vo.getEmail() %>	</td>		
 	</tr>
 	<tr>
 		<td colspan="11" bgcolor="D6D7D6" height="1"></td>
@@ -197,26 +124,33 @@ function fncGetUserList(){
 	<% } %>
 </table>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
+<!-- PageNavigation Start... -->
+<table width="100%" border="0" cellspacing="0" cellpadding="0"	style="margin-top:10px;">
 	<tr>
 		<td align="center">
-		
-		<%if(pageDivCnt > 1)  {%>
-				<a href="/listUser.do?page=<%=pageDivStart-1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=previous&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&lt;&lt;&nbsp;</a>
-		<%} %>
-		<%System.out.println("for 위 " + pageDivCnt); %>
-		<% for(int i=pageDivStart;i<=pageDivEnd;i++){ %>
-			<a href="/listUser.do?page=<%=i%>&pageDivCnt=<%=pageDivCnt %>&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>"><%=i %></a>
-		<%}	%>
-		
-		<%if(pageDivCnt<pageDivMax) {%>
-			<a href="/listUser.do?page=<%=pageDivEnd+1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=next&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&gt;&gt;&nbsp;</a>		
-		<%} %>
+		   <input type="hidden" id="currentPage" name="currentPage" value=""/>
+		   
+			<% if( resultPage.getCurrentPage() <= resultPage.getPageUnit() ){ %>
+					◀ 이전
+			<% }else{ %>
+					<a href="javascript:fncGetUserList('<%=resultPage.getCurrentPage()-1%>')">◀ 이전</a>
+			<% } %>
+
+			<%	for(int i=resultPage.getBeginUnitPage();i<= resultPage.getEndUnitPage() ;i++){	%>
+					<a href="javascript:fncGetUserList('<%=i %>');"><%=i %></a>
+			<% 	}  %>
+	
+			<% if( resultPage.getEndUnitPage() >= resultPage.getMaxPage() ){ %>
+					이후 ▶
+			<% }else{ %>
+					<a href="javascript:fncGetUserList('<%=resultPage.getCurrentPage()+1%>')">이후 ▶</a>
+			<% } %>
 		
     	</td>
 	</tr>
 </table>
-<!--  페이지 Navigator 끝 -->
+<!-- PageNavigation End... -->
+
 </form>
 </div>
 

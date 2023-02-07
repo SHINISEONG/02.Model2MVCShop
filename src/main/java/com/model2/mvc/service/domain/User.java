@@ -1,10 +1,11 @@
-package com.model2.mvc.service.user.vo;
+package com.model2.mvc.service.domain;
 
 import java.sql.Date;
 
 
-public class UserVO {
+public class User {
 	
+	///Field
 	private String userId;
 	private String userName;
 	private String password;
@@ -15,9 +16,11 @@ public class UserVO {
 	private String email;
 	private Date regDate;
 	
-	public UserVO(){
+	///Constructor
+	public User(){
 	}
 	
+	///Method 
 	public String getUserId() {
 		return userId;
 	}
@@ -72,10 +75,8 @@ public class UserVO {
 	public void setRegDate(Date regDate) {
 		this.regDate = regDate;
 	}
-	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "UserVO : [userId] "+userId+" [userName] "+userName+" [password] "+password+" [role] "+ role
 			+" [ssn] "+ssn+" [phone] "+phone+" [email] "+email+" [regDate] "+regDate;
 	}

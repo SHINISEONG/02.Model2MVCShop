@@ -1,60 +1,13 @@
 <%@page import="com.model2.mvc.view.user.GetUserAction"%>
 <%@ page contentType="text/html; charset=euc-kr" %>
 <%@ page import="java.util.*"  %>
-<%@ page import="com.model2.mvc.service.purchase.vo.*" %>
+<%@ page import="com.model2.mvc.service.domain.*" %>
 <%@ page import="com.model2.mvc.common.*" %>
+<%@ page import="com.model2.mvc.common.util.*" %>
+
 <%
-	HashMap<String,Object> map=(HashMap<String,Object>)request.getAttribute("map");
-	SearchVO searchVO=(SearchVO)request.getAttribute("searchVO");
-	
-	int total=0;
-	ArrayList<PurchaseVO> list=null;
-	if(map != null){
-		total=((Integer)map.get("count")).intValue();
-		list=(ArrayList<PurchaseVO>)map.get("list");
-	}
-	
-	int currentPage=searchVO.getPage();
-	
-	int pageDiv=searchVO.getPageDiv();
-	int pageDivCnt = 1;
-	
-	if(request.getParameter("pageDivCnt")!=null){
-		pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
-	}	
-	
-	System.out.println("pageDivCnt : " + pageDivCnt);
-	int pageDivStart = pageDivCnt*pageDiv - pageDiv + 1;
-	int pageDivEnd = pageDivStart+pageDiv-1;
-	
-	int pageDivMax = 0;
-	
-	int totalPage=0;
-	if(total > 0) {
-		
-		totalPage= total / searchVO.getPageUnit() ;
-		if(total%searchVO.getPageUnit() >0) {
-			totalPage += 1;
-		}
-		
-		pageDivMax = total / (pageDiv*searchVO.getPageUnit());
-		if(total%(pageDiv*searchVO.getPageUnit()) > 0){
-			pageDivMax +=1;
-		}
-		
-	}
-	
-	if (pageDivEnd>totalPage){
-		pageDivEnd = totalPage;
-	}
-	
-	if(searchVO.getSearchCondition() == null){
-		searchVO.setSearchCondition("");
-	}
-	
-	if(searchVO.getSearchKeyword() == null){
-		searchVO.setSearchKeyword("");
-	}
+List<Purchase> list = (List<Purchase>)request.getAttribute("list");
+Page resultPage=(Page)request.getAttribute("resultPage");
 %>
 
 <html>
@@ -64,7 +17,8 @@
 <link rel="stylesheet" href="/css/admin.css" type="text/css">
 
 <script type="text/javascript">
-	function fncGetUserList() {
+	function fncGetPurchaseList(currentPage) {
+		document.getElementById("currentPage").value = currentPage;
 		document.detailForm.submit();
 	}
 </script>
@@ -74,7 +28,7 @@
 
 <div style="width: 98%; margin-left: 10px;">
 
-<form name="detailForm" action="/listUser.do" method="post">
+<form name="detailForm" action="/listPurchase.do" method="post">
 
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
@@ -92,7 +46,7 @@
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0"	style="margin-top: 10px;">
 	<tr>
-		<td colspan="11" >전체  <%= total%> 건수, 현재 <%=currentPage %> 페이지</td>
+		<td colspan="11" >전체  <%=resultPage.getTotalCount()%> 건수, 현재 <%=resultPage.getCurrentPage()%> 페이지</td>
 	</tr>
 	<tr>
 		<td class="ct_list_b" width="100">No</td>
@@ -113,49 +67,59 @@
 	</tr>
 
 	
-	<% 	
-		int no=list.size();
-		for(int i=0; i<list.size(); i++) {
-			PurchaseVO purchaseVO = (PurchaseVO)list.get(i);
-	%>
+		<%
+			for(int i=0; i<list.size(); i++) {
+			Purchase purchaseVO = (Purchase)list.get(i);
+		%>
 	<tr class="ct_list_pop">
 		<td align="center">
-			<a href="/getPurchase.do?tranNo=<%=purchaseVO.getTranNo()%>"><%=list.size()-i %></a>
+			<a href="/getPurchase.do?tranNo=<%=purchaseVO.getTranNo()%>"><%=i+1%></a>
 		</td>
 		<td></td>
 		<td align="left">
 			<a href="/getUser.do?userId=<%=purchaseVO.getBuyer().getUserId()%>"><%=purchaseVO.getBuyer().getUserId()%></a>
 		</td>
 		<td></td>
-		<td align="left"><%=purchaseVO.getReceiverName() %></td>
+		<td align="left"><%=purchaseVO.getReceiverName()%></td>
 		<td></td>
-		<td align="left"><%=purchaseVO.getReceiverPhone() %></td>
+		<td align="left"><%=purchaseVO.getReceiverPhone()%></td>
 		<td></td>
 		<td align="left">
 			현재	
 		
 			<%
-			if (purchaseVO.getTranCode().trim().equals("1")){%>
+		if (purchaseVO.getTranCode().trim().equals("1")){
+		%>
 							구매완료 상태
-			<%} %>
+			<%
+		}
+		%>
 		
 			<%
-			if (purchaseVO.getTranCode().trim().equals("2")){%>
+					if (purchaseVO.getTranCode().trim().equals("2")){
+					%>
 							배송중
-			<%} %>
+			<%
+					}
+					%>
 			
 			<%
-			if (purchaseVO.getTranCode().trim().equals("3")){%>
+						if (purchaseVO.getTranCode().trim().equals("3")){
+						%>
 							배송완료 상태
-			<%} %>
+			<%
+						}
+						%>
 		
 			 입니다.
 		</td>
 		<td></td> 
    		<td align="left">
 
-		<% if ((purchaseVO.getTranCode().trim().equals("2"))){ %>
-			<a href="/updateTranCode.do?tranNo=<%=purchaseVO.getTranNo() %>&tranCode=3&page=<%=searchVO.getPage()%>">물건도착</a>
+		<%
+		if ((purchaseVO.getTranCode().trim().equals("2"))){
+		%>
+			<a href="/updateTranCode.do?tranNo=<%=purchaseVO.getTranNo()%>&tranCode=3&page=<%=resultPage.getCurrentPage()%>">물건도착</a>
 		<%} %>
 
 		</td>
@@ -171,19 +135,24 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 10px;">
 	<tr>
 		<td align="center">
-		 
+		<input type="hidden" id="currentPage" name="currentPage" value=""/>
+		   
+			<% if( resultPage.getCurrentPage() <= resultPage.getPageUnit() ){ %>
+					◀ 이전
+			<% }else{ %>
+					<a href="javascript:fncGetPurchaseList('<%=resultPage.getCurrentPage()-1%>')">◀ 이전</a>
+			<% } %>
+
+			<%	for(int i=resultPage.getBeginUnitPage();i<= resultPage.getEndUnitPage() ;i++){	%>
+					<a href="javascript:fncGetPurchaseList('<%=i %>');"><%=i %></a>
+			<% 	}  %>
+	
+			<% if( resultPage.getEndUnitPage() >= resultPage.getMaxPage() ){ %>
+					이후 ▶
+			<% }else{ %>
+					<a href="javascript:fncGetPurchaseList('<%=resultPage.getCurrentPage()+1%>')">이후 ▶</a>
+			<% } %>
 		
-		<%if(pageDivCnt > 1)  {%>
-			<a href="/listPurchase.do?page=<%=pageDivStart-1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=previous&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&lt;&lt;&nbsp;</a>
-		<%} %>
-		
-		<% for(int i=pageDivStart;i<=pageDivEnd;i++){ %>
-			<a href="/listPurchase.do?page=<%=i%>&pageDivCnt=<%=pageDivCnt %>&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>"><%=i %></a>
-		<%}	%>
-		
-		<%if(pageDivCnt<pageDivMax) {%>
-			<a href="/listPurchase.do?page=<%=pageDivEnd+1%>&pageDivCnt=<%=pageDivCnt %>&pageDivCondition=next&searchKeyword=<%=searchVO.getSearchKeyword()%>&searchCondition=<%=searchVO.getSearchCondition()%>">&nbsp;&gt;&gt;&nbsp;</a>		
-		<%} %>
 		
 		</td>
 	</tr>

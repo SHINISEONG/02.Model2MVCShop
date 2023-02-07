@@ -24,9 +24,7 @@ window.onload = function(){
 }
 
 function fncCheckDuplication() {
-	// Form 유효성 검증
 	if(document.detailForm.userId.value != null && document.detailForm.userId.value.length >0) {
-		
 	    document.detailForm.action='/checkDuplication.do';
 	    document.detailForm.submit();
 	}else {
@@ -49,18 +47,16 @@ function fncUseId() {
 
 <form name="detailForm"  method="post">
 
-<input type="hidden" name="name" value=""/>
-
 <!-- 타이틀 시작 -->
 <table width="100%" height="37" border="0" cellpadding="0"	cellspacing="0">
 	<tr>
 		<td width="15" height="37">
-			<img src="/images/ct_ttl_img01.gif" width="15" height="37"/>
+			<img src="/images/ct_ttl_img01.gif" width="15" height="37" />
 		</td>
 		<td background="/images/ct_ttl_img02.gif" width="100%" style="padding-left:10px;">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 				<tr>
-					<td width="93%" class="ct_ttl01">ID중복확인</td> <%--  css 호출--%>
+					<td width="93%" class="ct_ttl01">ID중복확인</td>
 					<td width="20%" align="right">&nbsp;</td>
 				</tr>
 			</table>
@@ -82,21 +78,14 @@ function fncUseId() {
 						<img src="/images/ct_bot_ttl01.gif" width="4" height="7">
 					</td>
 					<td class="ct_ttl02">
-				<%
-					if(request.getAttribute("result") != null){
-				%>
-					<%=userId %>
-					<%
-						if(result){
-					%>
-							는 사용 가능합니다.
-					<%
-						}else{
-					%>
-							는 사용이 불가능합니다.
-					<%
-						}
-					}
+					<%	if(request.getAttribute("result") != null){ %>
+								<%=userId %>
+					<%		if(result){	 %>
+									는 사용 가능합니다.
+					<%		}else{	%>
+									는 사용이 불가능합니다.
+					<%		}
+							}
 					%>
 					</td>
 				</tr>
@@ -116,7 +105,7 @@ function fncUseId() {
 	</tr>
 	<tr>
 		<td width="104" class="ct_write">
-			아이디 <img src="/images/ct_icon_red.gif" width="3" height="3" align="absmiddle">
+			아이디 <img src="/images/ct_icon_red.gif" width="3" height="3" align="absmiddle"/>
 		</td>
 		<td bgcolor="D6D6D6" width="1"></td>
 		<td class="ct_write01">
@@ -124,30 +113,25 @@ function fncUseId() {
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 				<tr>
 					<td width="105">
-					<%
-						if(result) {
-					%>
-						<input type="text" name="userId" id="userId" value="<%=userId %>" class="ct_input_g" style="width:100px; height:19px"  maxLength="20" />
-					<%
-						}else {
-					%>			
-						<input type="text" name="userId" id="userId" class="ct_input_g" style="width:100px; height:19px"  maxLength="20" />
-					<%
-						}
-					%>		
+					<%	if(result) { %>
+						<input 	type="text" name="userId" id="userId" value="<%=userId %>" class="ct_input_g" 
+										style="width:100px; height:19px"  maxLength="20" >
+					<%	}else {%>			
+						<input 	type="text" name="userId" id="userId" class="ct_input_g" 
+										style="width:100px; height:19px"  maxLength="20" >
+					<%	} %>		
 					</td>
 					<td>
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
 								<td width="4" height="21">
-									<img src="/images/ct_btng01.gif" width="4" height="21">
+									<img src="/images/ct_btng01.gif" width="4" height="21"/>
 								</td>
-								<td 	align="center" background="/images/ct_btng02.gif" class="ct_btn" 
-										style="padding-top:3px;">
+								<td align="center" background="/images/ct_btng02.gif" class="ct_btn" style="padding-top:3px;">
 									<a href="javascript:fncCheckDuplication();">중복확인</a>
 								</td>
 								<td width="4" height="21">
-									<img src="/images/ct_btng03.gif" width="4" height="21">
+									<img src="/images/ct_btng03.gif" width="4" height="21"/>
 								</td>
 							</tr>
 						</table>
@@ -164,35 +148,31 @@ function fncUseId() {
 <!-- 등록테이블 끝 -->
 
 <!-- 버튼 시작 -->
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:10px;">
+<table width="100%" border="0" cellspacing="0" cellpadding="0"	style="margin-top:10px;">
 	<tr>
 		<td align="center">
 			<table border="0" cellspacing="0" cellpadding="0">
 				<tr>
-				<%
-					if(result){
-				%>			
+				<%	if(result){ %>			
 					<td width="17" height="23">
-						<img src="/images/ct_btnbg01.gif" width="17" height="23"/>
+						<img src="/images/ct_btnbg01.gif" width="17" height="23" />
 					</td>
 					<td background="/images/ct_btnbg02.gif" class="ct_btn01" style="padding-top:3px;">
 						<a href="javascript:fncUseId();">사용</a>
 					</td>
 					<td width="14" height="23">
-						<img src="/images/ct_btnbg03.gif" width="14" height="23"/>
+						<img src="/images/ct_btnbg03.gif" width="14" height="23" />
 					</td>
-				<%
-					}
-				%>				
+				<%	} %>				
 					<td width="30"></td>					
 					<td width="17" height="23">
-						<img src="/images/ct_btnbg01.gif" width="17" height="23"/>
+						<img src="/images/ct_btnbg01.gif" width="17" height="23" />
 					</td>
 					<td background="/images/ct_btnbg02.gif" class="ct_btn01" style="padding-top:3px;">
 						<a href="javascript:window.close();">닫기</a>
 					</td>
 					<td width="14" height="23">
-						<img src="/images/ct_btnbg03.gif" width="14" height="23">
+						<img src="/images/ct_btnbg03.gif" width="14" height="23" />
 					</td>
 				</tr>
 			</table>
@@ -200,7 +180,6 @@ function fncUseId() {
 	</tr>
 </table>
 <!-- 버튼 끝 -->
-
 </form>
 
 </body>

@@ -5,10 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.model2.mvc.common.SearchVO;
+import com.model2.mvc.common.Search;
 import com.model2.mvc.common.util.DBUtil;
-import com.model2.mvc.service.product.vo.ProductVO;
+import com.model2.mvc.service.domain.Product;
 
 public class ProductDAO {
 	/// field
@@ -17,7 +19,7 @@ public class ProductDAO {
 	}
 
 	/// method
-	public void insertProduct(ProductVO productVO) throws Exception {
+	public void insertProduct(Product productVO) throws Exception {
 		Connection con = DBUtil.getConnection();
 
 		String sql = "INSERT INTO product VALUES(seq_product_prod_no.NEXTVAL, ?, ?, ?, ?, ?, sysdate)";
@@ -34,7 +36,7 @@ public class ProductDAO {
 		con.close();
 	}// end of insertProduct()
 
-	public ProductVO findProduct(int prodNo) throws Exception {
+	public Product findProduct(int prodNo) throws Exception {
 		Connection con = DBUtil.getConnection();
 		PreparedStatement stmt = con.prepareStatement("	SELECT p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t "
 				+ "WHERE p.prod_no = t.prod_no(+) AND p.prod_no = ?");
@@ -43,10 +45,10 @@ public class ProductDAO {
 
 		ResultSet rs = stmt.executeQuery();	
 		
-		ProductVO productVO = null;
+		Product productVO = null;
 		
 		while (rs.next()) {
-			productVO = new ProductVO();
+			productVO = new Product();
 			productVO.setProdNo(prodNo);
 			
 			productVO.setProdName(rs.getString("PROD_NAME"));
@@ -62,87 +64,58 @@ public class ProductDAO {
 		return productVO;
 	}// end of findProduct
 
-	public HashMap<String, Object> getProductList(SearchVO searchVO) throws Exception {
+	public Map<String, Object> getProductList(Search search) throws Exception {
 
+		
+		
+		String sql = "SELECT prod_no, prod_name, price, reg_date FROM product ";
+			System.out.println("getPL 내부 search"+search);
+			if(search.getSearchCondition() != null && search.getSearchKeyword()!=null) {
+				if (search.getSearchCondition().equals("0") && !search.getSearchKeyword().equals("")) {
+					sql += " WHERE PROD_NO='" + search.getSearchKeyword() // searchCon이 0이면 아이디검색
+							+ "'";
+				} else if (search.getSearchCondition().equals("1") && !search.getSearchKeyword().equals("")) {
+					sql += " WHERE PROD_NAME like '%" + search.getSearchKeyword() // serchCon이 1이면 이름 검색
+							+ "%'";
+				} else if (search.getSearchCondition().equals("2") && !search.getSearchKeyword().equals("")) {
+					sql += " WHERE PRICE='" + search.getSearchKeyword() // serchCon이 2이면 가격 검색
+					+ "'";
+				}
+			}
+		System.out.println("total Count 전 Query : " + sql);
+		int totalCount = getTotalCount(sql);
+		
+		System.out.println("상품검색 로우의 수:" + totalCount);
+		
+		sql += "ORDER BY prod_no";
+		
+		sql = makeCurrentPageSql(sql, search);
+		
+		System.out.println("makeCurrentPage result : " + sql);
+		
 		Connection con = DBUtil.getConnection();
-		
-		String sql = "SELECT count(prod_no) total FROM product";
-		if (searchVO.getSearchCondition() != null) {
-			
-			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " WHERE PROD_NO='" + searchVO.getSearchKeyword() // searchCon이 0이면 아이디검색
-						+ "'";
-			} else if (searchVO.getSearchCondition().equals("1")) {
-				sql += " WHERE PROD_NAME like '%" + searchVO.getSearchKeyword() // serchCon이 1이면 이름 검색
-						+ "%'";
-			} else if (searchVO.getSearchCondition().equals("2")) {
-				sql += " WHERE PRICE='" + searchVO.getSearchKeyword() // serchCon이 2이면 가격 검색
-				+ "'";
-			}
-		}
-		
 		PreparedStatement stmt = con.prepareStatement(sql);
-		
 		ResultSet rs = stmt.executeQuery();
-		rs.next();
-		int total = rs.getInt("total");
-		
-		sql = "SELECT iv.num, p.*, NVL(t.tran_status_code,0) tran_code, NVL(t.tran_no,0) tran_no FROM product p, transaction t, (SELECT ROWNUM as num, prod_no FROM product ";
-		
-		if (searchVO.getSearchCondition() != null) {
-			
-			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " WHERE PROD_NO='" + searchVO.getSearchKeyword() // searchCon이 0이면 아이디검색
-						+ "'";
-			} else if (searchVO.getSearchCondition().equals("1")) {
-				sql += " WHERE PROD_NAME like '%" + searchVO.getSearchKeyword() // serchCon이 1이면 이름 검색
-						+ "%'";
-			} else if (searchVO.getSearchCondition().equals("2")) {
-				sql += " WHERE PRICE='" + searchVO.getSearchKeyword() // serchCon이 2이면 가격 검색
-				+ "'";
-			}
-		}
-		
-		sql += " ORDER BY prod_no) iv "
-		 		+ " WHERE p.prod_no = t.prod_no(+) "
-		 		+ " AND p.prod_no = iv.prod_no"
-				+ " AND (num >= ? AND num <= ?)";
-		
-		System.out.println(sql);
-		stmt = con.prepareStatement(sql);
-		
-		stmt.setInt(1, (searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit() + 1));
-		//1 * 3 - 3 + 1 = 1
-		//2 * 3 - 3 + 1 = 4
-		stmt.setInt(2, (searchVO.getPage() * searchVO.getPageUnit()));
-		
-		rs = stmt.executeQuery();
-		
-		System.out.println("상품검색 로우의 수:" + total);
+				
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("totalCount", new Integer(totalCount)); 
 
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("count", new Integer(total)); 
+		System.out.println("searchVO.getPage():" + search.getCurrentPage());
+		System.out.println("searchVO.getPageSize():" + search.getPageSize());
 
-		System.out.println("searchVO.getPage():" + searchVO.getPage());
-		System.out.println("searchVO.getPageUnit():" + searchVO.getPageUnit());
-
-		ArrayList<ProductVO> list = new ArrayList<ProductVO>();
-		if (total > 0) { // 검색 결과가 있으면!
+		List<Product> list = new ArrayList<Product>();
+		if (totalCount > 0) { // 검색 결과가 있으면!
 			
 			while(rs.next()) {
-				ProductVO vo = new ProductVO();
-
-				vo.setProdNo(rs.getInt("PROD_NO"));
-				vo.setProdName(rs.getString("PROD_NAME"));
-				vo.setFileName(rs.getString("IMAGE_FILE"));
-				vo.setProdDetail(rs.getString("PROD_DETAIL"));
-				vo.setManuDate(rs.getString("MANUFACTURE_DAY"));
-				vo.setPrice(rs.getInt("PRICE"));
-				vo.setRegDate(rs.getDate("REG_DATE"));
-				vo.setProTranCode(rs.getString("tran_code"));
-				vo.setProTranNo(rs.getInt("tran_no"));
-				list.add(vo);
+				Product product = new Product();
 				
+				product.setProdNo(rs.getInt("PROD_NO"));
+				product.setProdName(rs.getString("PROD_NAME"));
+				product.setPrice(rs.getInt("PRICE"));
+				product.setRegDate(rs.getDate("REG_DATE"));
+				product.setProTranCode(rs.getString("tran_code"));
+				product.setProTranNo(rs.getInt("tran_no"));
+				list.add(product);
 			}
 		}
 		System.out.println("list.size() : " + list.size());
@@ -150,11 +123,13 @@ public class ProductDAO {
 		System.out.println("map().size() : " + map.size());
 
 		con.close();
-
+		stmt.close();
+		rs.close();
+		
 		return map;
 	}// end of getProductList
 
-	public void updateProduct(ProductVO productVO) throws Exception {
+	public void updateProduct(Product productVO) throws Exception {
 
 		Connection con = DBUtil.getConnection();
 
@@ -169,8 +144,41 @@ public class ProductDAO {
 		stmt.setString(5, productVO.getFileName());
 		stmt.setInt(6, productVO.getProdNo());
 		stmt.executeUpdate();
-
+		
+		stmt.close();
 		con.close();
 	}// end of updateProduct
-
+	
+	private int getTotalCount(String sql) throws Exception {
+		Connection con = DBUtil.getConnection();
+		sql = "SELECT COUNT(*) total FROM "
+				+ "(" + sql + ")";
+		
+		System.out.println("totalCount query " + sql);
+		
+		PreparedStatement stmt = con.prepareStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		
+		int totalCount = 0; 
+		rs.next();
+		totalCount = rs.getInt("total");
+		
+		con.close();
+		stmt.close();
+		rs.close();
+		
+		return totalCount;
+	}
+	
+	private String makeCurrentPageSql(String sql, Search search) {
+		sql = "SELECT iv2.*, NVL(t.tran_no,0) \"tran_no\" , NVL(t.tran_status_code,0) \"tran_code\" FROM "
+				+ " (SELECT ROWNUM num, iv.* FROM ("+sql+") iv WHERE ROWNUM <= "+(search.getCurrentPage()*search.getPageSize())+") iv2, transaction t "
+				+ " WHERE iv2.prod_no = t.prod_no(+) "
+				+ " AND num >= " + ((search.getCurrentPage()-1)*search.getPageSize()+1) +" ORDER BY num" ;
+		
+		System.out.println("UserDAO :: make SQL :: "+ sql);
+		
+	return sql;
+	}
+	
 }

@@ -5,25 +5,25 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.model2.mvc.framework.Action;
+import com.model2.mvc.service.domain.User;
 import com.model2.mvc.service.user.UserService;
 import com.model2.mvc.service.user.impl.UserServiceImpl;
-import com.model2.mvc.service.user.vo.UserVO;
 
 
 public class LoginAction extends Action{
 
 	@Override
-	public String execute(	HttpServletRequest request,
-												HttpServletResponse response) throws Exception {
-		UserVO userVO=new UserVO();
-		userVO.setUserId(request.getParameter("userId"));
-		userVO.setPassword(request.getParameter("password"));
+	public String execute(HttpServletRequest request,	HttpServletResponse response) throws Exception {
 		
-		UserService service=new UserServiceImpl();
-		UserVO dbVO=service.loginUser(userVO);
+		User user=new User();
+		user.setUserId(request.getParameter("userId"));
+		user.setPassword(request.getParameter("password"));
+		
+		UserService userService=new UserServiceImpl();
+		User dbUser=userService.loginUser(user);
 		
 		HttpSession session=request.getSession();
-		session.setAttribute("user", dbVO);
+		session.setAttribute("user", dbUser);
 		
 		return "redirect:/index.jsp";
 	}

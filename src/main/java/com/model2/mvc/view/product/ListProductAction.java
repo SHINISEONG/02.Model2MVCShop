@@ -1,11 +1,12 @@
 package com.model2.mvc.view.product;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.model2.mvc.common.SearchVO;
+import com.model2.mvc.common.Page;
+import com.model2.mvc.common.Search;
 import com.model2.mvc.framework.Action;
 import com.model2.mvc.service.product.ProductService;
 import com.model2.mvc.service.product.impl.ProductServiceImpl;
@@ -14,45 +15,35 @@ public class ListProductAction extends Action {
 
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		SearchVO searchVO = new SearchVO();
+		Search search = new Search();
 
-		int page = 1;
-		if (request.getParameter("page") != null)
-		page = Integer.parseInt(request.getParameter("page"));
-
-		searchVO.setPage(page);
-		searchVO.setSearchCondition(request.getParameter("searchCondition"));
-		searchVO.setSearchKeyword(request.getParameter("searchKeyword"));
-		
-		String pageUnit=getServletContext().getInitParameter("pageSize");  //servletcontext를 각 액션에 부여한 이유.
-		String pageDiv=getServletContext().getInitParameter("pageDiv");
-		searchVO.setPageUnit(Integer.parseInt(pageUnit));
-		searchVO.setPageDiv(Integer.parseInt(pageDiv));		
-		
-		
-		int pageDivCnt = 1; 
-		if (request.getParameter("pageDivCnt")!=null) {
-			pageDivCnt = Integer.parseInt(request.getParameter("pageDivCnt"));
+		int currentPage = 1;
+		if (request.getParameter("currentPage") != null) {
+			currentPage = Integer.parseInt(request.getParameter("currentPage"));
 		}
-		String pageDivCondition = request.getParameter("pageDivCondition");
-		
-		if(pageDivCondition != null) {
-			if(pageDivCondition.equals("previous")) {
-				pageDivCnt--;
-			} else if(pageDivCondition.equals("next")) {
-				pageDivCnt++;
-			}
-		}
-		
-		ProductService service = new ProductServiceImpl();
-		HashMap<String, Object> map = service.getProductList(searchVO);
 
-		request.setAttribute("map", map);
-		request.setAttribute("searchVO", searchVO);
+		search.setCurrentPage(currentPage);
+		search.setSearchCondition(request.getParameter("searchCondition"));
+		search.setSearchKeyword(request.getParameter("searchKeyword"));
+		
+		int pageSize = Integer.parseInt(getServletContext().getInitParameter("pageSize"));  //servletcontext를 각 액션에 부여한 이유.
+		int pageUnit = Integer.parseInt(getServletContext().getInitParameter("pageUnit"));
+		search.setPageSize(pageSize);
+		search.setPageUnit(pageUnit);		
+		
+		System.out.println(search);
+		
+		ProductService productService = new ProductServiceImpl();
+		Map<String, Object> map = productService.getProductList(search);
+		
+		Page resultPage = new Page( currentPage, ((Integer)map.get("totalCount")).intValue(), pageUnit, pageSize);
+		
+		request.setAttribute("list", map.get("list"));
+		request.setAttribute("resultPage", resultPage);
+		request.setAttribute("search", search);
 		
 
-		// TODO navigating 방식 및 URI 확인
-		return "forward:/product/listProduct.jsp?&pageDivCnt="+pageDivCnt;
+		return "forward:/product/listProduct.jsp";
 	}
 
 }
