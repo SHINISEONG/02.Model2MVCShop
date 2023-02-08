@@ -225,9 +225,7 @@ User userVO = (User)session.getAttribute("user");
 		<td align="center">
 		<input type="hidden" id="currentPage" name="currentPage" value=""/>
 		<input type="hidden" id="menu" name="menu" value=""/>
-		<% if( resultPage.getCurrentPage() <= resultPage.getPageUnit() ){ %>
-					◀ 이전
-			<% }else{ %>
+			<% if( resultPage.getCurrentPage() > resultPage.getPageUnit() ){ %>
 					<a href="javascript:fncGetProductList('<%=resultPage.getCurrentPage()-1%>', '<%=menu %>')">◀ 이전</a>
 			<% } %>
 
@@ -235,9 +233,7 @@ User userVO = (User)session.getAttribute("user");
 					<a href="javascript:fncGetProductList('<%=i %>', '<%=menu %>')"><%=i %></a>
 			<% 	}  %>
 	
-			<% if( resultPage.getEndUnitPage() >= resultPage.getMaxPage() ){ %>
-					이후 ▶
-			<% }else{ %>
+			<% if( resultPage.getEndUnitPage() < resultPage.getMaxPage() ){ %>
 					<a href="javascript:fncGetProductList('<%=resultPage.getCurrentPage()+1%>', '<%=menu %>')">이후 ▶</a>
 			<% } %>
 		

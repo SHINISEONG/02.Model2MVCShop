@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
-<%@ page import = "com.model2.mvc.service.product.domain.*" %>
+
 <%@ page import = "com.model2.mvc.service.domain.*" %>
 
 <%

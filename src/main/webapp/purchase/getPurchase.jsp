@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=euc-kr" %>
-<%@ page import = "com.model2.mvc.service.purchase.domain.*" %>
+<%@ page import = "com.model2.mvc.service.domain.*" %>
 <%
 Purchase purchaseVO = (Purchase)request.getAttribute("purchaseVO");
 %>
